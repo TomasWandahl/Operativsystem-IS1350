@@ -11,9 +11,23 @@ struct chunk{
 
 struct chunk* flist = NULL;
 
+
+
+void split(size_t size, struct chunk* cnk) {
+	if(cnk->size > size + sizeof(struct chunk)){
+		struct chunk* split = (struct chunk*)((void*)cnk + sizeof(struct chunk) + size);
+
+		split->size = cnk->size - size - sizeof(struct chunk);
+
+		cnk->size = size;
+
+		free((void*)(split+1));
+	}
+}
+
 void *malloc(size_t size){
 
-	cd Cif (size == 0){
+	if(size == 0){
 		// much weird request, such odd thing to allocate zero
 		return NULL;
 	}
@@ -23,22 +37,9 @@ void *malloc(size_t size){
 
 	while(next != NULL){
 	 if(next->size >= size){
-	 	// shit, we could totaly split the block, lets do that!
-	 	int remSize = next->size - size;
-	 	//if(remSize >= MIN) {
-	 		//next->size = remSize;
-	 		/*void *memory = sbrk(size+ sizeof(struct chunk));
-			if (memory == (void *)-1){
-			return NULL;
-			} else { 
-			struct chunk *cnk = (struct chunk*)memory;
-			cnk->size = size;
-			return (void*)(cnk + 1);
-			}*/
-		//} else {
 	 	
-
-
+	 	
+	 	split(size, next);
 
 
 	   if(prev != NULL){
@@ -123,7 +124,6 @@ void insertionSort( struct chunk* ny){
 
 void free(void *memory){
 	
-	
 	if(memory != NULL){
 		/* we are jumping back one chunk position */
 		struct chunk *cnk = (struct chunk*)((struct chunk*)memory - 1);
@@ -131,8 +131,6 @@ void free(void *memory){
 		//flist = cnk;
 		insertionSort(cnk);
 	}
-	
 	return;
-	
 }
 
